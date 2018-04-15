@@ -33,13 +33,11 @@ def h(x, nargout=1):
 def f1(x, **kwargs):
     nargout = 1
     if 'nargout' in kwargs:
-        nargout = 3
+        nargout = kwargs['nargout']
     if 'A' in kwargs:
         A = kwargs['A']
     else:
-        A = np.ones((3, 3)) - np.eye(3)
-        # A = np.eye(len(x))
-
+        A = np.eye(len(x))
     if 'func' in kwargs:
         func = kwargs['func']
     else:
@@ -47,7 +45,7 @@ def f1(x, **kwargs):
 
     if nargout == 3:
         value, grad, hessian = func(np.dot(A, x), nargout)
-        return value, np.dot(A, grad), np.dot(A, hessian).dot(A)
+        return value, np.dot(grad, A), np.dot(np.transpose(A), hessian).dot(A)
         # return value, np.matmul(np.transpose(A), grad), np.matmul(np.transpose(A), hessian).__matmul__(A)
 
     else:
@@ -58,7 +56,7 @@ def f1(x, **kwargs):
 def f2(x, **kwargs):
     nargout = 1
     if 'nargout' in kwargs:
-        nargout = 3
+        nargout = kwargs['nargout']
     if 'scalar_func' in kwargs:
         scalar_func = kwargs['scalar_func']
     else:

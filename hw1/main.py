@@ -1,9 +1,9 @@
-import numpy as np
-from hw1.task3 import *
+from hw1.functions import *
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 
-### task 4
+
+# task 4
 def numdiff(myfunc, x, *args):
     """
     :param myfunc: function handler, will contain functions from tasks 3, to
@@ -14,20 +14,24 @@ def numdiff(myfunc, x, *args):
     :return: gnum: numerical estimation of gradient.
              Hnum: numerical estimation of hessian.
     """
+    N = len(x)
     epsilon = args[0]
-    e_mat = np.identity(len(x))
+    e_mat = np.identity(N)
     args = args[1]  # the args to pass to the function
+
     # calc grad and hessian
-    output_grad = np.zeros((len(x), 1))
-    output_hessian = np.zeros((len(x), len(x)))
-    for i in range(len(x)):
+    output_grad = np.zeros((N, 1))
+    output_hessian = np.zeros((N, N))
+    for i in range(N):
         val_plus, g_plus, _ = myfunc(x + epsilon * e_mat[i], **args)
         val_minus, g_minus, _ = myfunc(x - epsilon * e_mat[i], **args)
         output_grad[i] = (val_plus - val_minus) / (2 * epsilon)
         output_hessian[:, i] = (g_plus - g_minus) / (2 * epsilon)
+
     return output_grad, output_hessian
 
-### task 5
+
+# task 5
 def analyze(f1_res, f2_res, numeric_list, input, epsilons):
     num_f1_res, num_f2_res = numeric_list[3]
     values, grads, hessians = [[x, y] for x, y in zip(f1_res, f2_res)]
@@ -66,10 +70,11 @@ def analyze(f1_res, f2_res, numeric_list, input, epsilons):
 
 if __name__ == "__main__":
     # inputs = np.random.randint(10, size=3)
-    inputs = np.array((1.5, 2.7, 3))
-    # A = np.random.randn(3, 3)
-    A = np.array(([1, 2, 3], [5, 2, 1], [1, 2, 7]))
-    args1 = {'func':phi, 'nargout':3, 'A':A}
+    inputs = np.array((1.1, 1.2, 1.3))
+    A = np.random.randn(3, 3)
+    # A = np.array(([1, 2, 0], [0.4, 2, 1], [1, 2, 0.7]))
+    # A = np.eye(3)
+    args1 = {'func': phi, 'nargout': 3, 'A': A}
     args2 = {'nargout':3}
     values = np.linspace(0, 10, 1000)
     epsilons = [(2 ** -(16-x)) * max(abs(inputs)) for x in values]
