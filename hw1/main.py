@@ -68,9 +68,9 @@ def analyze(f1_res, f2_res, numeric_list, input, epsilons):
         # plot hessian
         plt.subplot(222), plt.imshow(hess_diff, extent=[0, 1, 0, 1]), plt.colorbar(), plt.title("Hessian Difference", fontsize=fontsize)
         # plot max grad per epsilon
-        plt.subplot(223), plt.semilogx(epsilons[1:], grad_per_eps[i][1:]), plt.xlabel("epsilon value"), plt.ylabel("error"), plt.xlim((10**-15.5, 10**-1)), plt.ylim((0, 1)), plt.title("Max abs diff of gradient per epsilon", fontsize=fontsize)
+        plt.subplot(223), plt.loglog(epsilons[1:], grad_per_eps[i][1:]), plt.xlabel("epsilon value"), plt.ylabel("error"), plt.title("Max abs diff of gradient per epsilon", fontsize=fontsize)
         # plot max grad per epsilon
-        plt.subplot(224), plt.semilogx(epsilons[1:], hes_per_eps[i][1:]), plt.xlabel("epsilon value"), plt.ylabel("error"), plt.xlim((10**-15.5, 10**-1)), plt.ylim((0, 1)), plt.title("Max abs diff of hess per epsilon", fontsize=fontsize)
+        plt.subplot(224), plt.loglog(epsilons[1:], hes_per_eps[i][1:]), plt.xlabel("epsilon value"), plt.ylabel("error"), plt.title("Max abs diff of hess per epsilon", fontsize=fontsize)
         plt.show()
  # plt.xlim((0, 10**-2))
 
