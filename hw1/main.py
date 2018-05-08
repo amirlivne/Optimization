@@ -1,8 +1,7 @@
 from functions import *
 import matplotlib.pyplot as plt
 from tqdm import tqdm
-
-
+import numpy as np
 
 def analyze(f1_res, f2_res, numeric_list, epsilons):
     num_f1_res, num_f2_res = numeric_list[0]
@@ -42,6 +41,7 @@ def analyze(f1_res, f2_res, numeric_list, epsilons):
         # plot max grad per epsilon
         plt.subplot(224), plt.loglog(epsilons[1:], hes_per_eps[i][1:]), plt.xlabel("epsilon value"), plt.ylabel("error"), plt.title("Max abs diff of hess per epsilon", fontsize=fontsize)
         plt.show()
+
 
 if __name__ == "__main__":
     inputs = np.array((0.5377, 1.8399, -2.2588))
