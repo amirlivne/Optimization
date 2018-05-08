@@ -1,6 +1,6 @@
 import numpy as np
 from scipy.optimize import approx_fprime, rosen
-
+import matplotlib.pyplot as plt
 
 # f_x = rosen(x)
 def rosenbrok_func(x):
@@ -11,7 +11,7 @@ def rosenbrok_func(x):
         return sum(100.0*(x[1:] - x[:-1]**2.0)**2.0 + (1 - x[:-1])**2.0)
 
 
-def armijo(x, func, d, sigma=0.25, beta=0.5, max_iter=20):
+def armijo(x, func, d, sigma=0.25, beta=0.5):
     """
     Armijo line search
     :param x: point
@@ -28,44 +28,42 @@ def armijo(x, func, d, sigma=0.25, beta=0.5, max_iter=20):
     # compute c (the diffrencial of phi(alfa) at alfa=0)
     grad_x = approx_fprime(x, func, epsilon=1e-8)
     c = np.dot(grad_x, d)
-    print(c, "c")
-    print(func(x + alfa*d))
-    print(sigma*c*alfa)
-    print('\n')
-    for i in range(max_iter):
-        if func(x + alfa*d) > sigma*c*alfa:
-            alfa *= beta
-        else:
-            break
-        print(alfa)
-        print(func(x + alfa * d))
-        print(sigma * c * alfa)
-        print('\n')
+
+    while (func(x + alfa*d) - func(x)) > sigma*c*alfa:
+        alfa *= beta
 
     return alfa
 
 
 def grad_descent(func, x_init, eps=10e-5, max_iter=400):
+    """
+
+    :param func:
+    :param x_init:
+    :param eps:
+    :param max_iter:
+    :return:
+    """
     x = x_init
     grad_x = approx_fprime(x, func, epsilon=1e-8)
+    d = -grad_x
+    converge_vals = []
     for i in range(max_iter):
+        converge_vals.append(func(x))
+        print(np.linalg.norm(grad_x))
         if np.linalg.norm(grad_x) < eps:
             break
         else:
-            x += x + armijo(x, func, -grad_x)
+            x += armijo(x, func, d)*d
             grad_x = approx_fprime(x, func, epsilon=1e-8)
+    return x, converge_vals
 
-    return x
 
-
-x = np.array([-1., -1.])
-grad_x = approx_fprime(x, rosen, epsilon=1e-8)
 func = rosen
-alfa = armijo(x, func, -grad_x)
-
-
-e= np.sqrt(np.finfo(float).eps)
-
-x_fin = grad_descent(rosen, x)
+x = np.array([1.2, 0.5])
 print(func(x))
+x_fin, vals = grad_descent(rosen, x)
+print(func(x_fin))
 
+plt.plot(np.log(vals))
+plt.show()
