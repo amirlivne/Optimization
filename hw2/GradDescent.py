@@ -1,15 +1,5 @@
+from hw2.mcholmz import modifiedChol
 import numpy as np
-from scipy.optimize import approx_fprime, rosen
-import matplotlib.pyplot as plt
-
-# f_x = rosen(x)
-def rosenbrok_func(x):
-    if len(x) == 1:
-        print('error, vector must be at lease with 2 variables')
-        return None
-    else:
-        return sum(100.0*(x[1:] - x[:-1]**2.0)**2.0 + (1 - x[:-1])**2.0)
-
 
 def armijo(x, func, d, sigma=0.25, beta=0.5):
     """
@@ -17,16 +7,17 @@ def armijo(x, func, d, sigma=0.25, beta=0.5):
     :param x: point
     :param func: a function to optimize
     :param d: direction of line for the line search
-    :param sigma:
+    :param sigma: parameter for stop condition
     :param beta: divide factor to find optimal alfa
     :return: alfa as float - the optimal step size
     """
 
     # init alfa
-    alfa = 1
+    alfa = 1.
 
     # compute c (the diffrencial of phi(alfa) at alfa=0)
-    grad_x = approx_fprime(x, func, epsilon=1e-8)
+    # grad_x = approx_fprime(x, func, epsilon=1e-8)
+    _, grad_x = func(x, nargout=2)
     c = np.dot(grad_x, d)
 
     while (func(x + alfa*d) - func(x)) > sigma*c*alfa:
@@ -35,35 +26,72 @@ def armijo(x, func, d, sigma=0.25, beta=0.5):
     return alfa
 
 
-def grad_descent(func, x_init, eps=10e-5, max_iter=400):
+def grad_descent(func, x_init, eps=10e-5):
     """
-
-    :param func:
-    :param x_init:
-    :param eps:
-    :param max_iter:
-    :return:
+    conpute gradien descent
+    :param func: a function to optimize
+    :param x_init: initial point
+    :param eps: for stop conditions
+    :return: optimal point x, and list of f(x) values during optimization
     """
     x = x_init
-    grad_x = approx_fprime(x, func, epsilon=1e-8)
-    d = -grad_x
     converge_vals = []
-    for i in range(max_iter):
+    while True:
         converge_vals.append(func(x))
-        print(np.linalg.norm(grad_x))
-        if np.linalg.norm(grad_x) < eps:
+        # grad_x = approx_fprime(x, func, epsilon=1e-8)
+        _, grad_x = func(x, nargout=2)
+        d = -grad_x
+        x += armijo(x, func, d)*d
+        if np.linalg.norm(grad_x) <= eps:
             break
-        else:
-            x += armijo(x, func, d)*d
-            grad_x = approx_fprime(x, func, epsilon=1e-8)
     return x, converge_vals
 
 
-func = rosen
-x = np.array([1.2, 0.5])
-print(func(x))
-x_fin, vals = grad_descent(rosen, x)
-print(func(x_fin))
+def newton_grad_descent(func, x_init, eps=10e-5):
+    """
+    conpute gradien descent using newton method
+    :param func: a function to optimize
+    :param x_init: initial point
+    :param eps: for stop conditions
+    :return: optimal point x, and list of f(x) values during optimization
+    """
+    x = x_init
+    converge_vals = []
+    while True:
+        converge_vals.append(func(x))
+        # grad_x = approx_fprime(x, func, epsilon=1e-8)
+        _, grad_x, H = func(x, nargout=3)
+        L, D, e = modifiedChol(H)
+        # Err = (L @ np.diag(D.flatten()) @ L.T) - H
+        d = solve_direction(L, D, grad_x)
+        x += armijo(x, func, d)*d
+        if np.linalg.norm(grad_x) <= eps:
+            break
+    return x, converge_vals
 
-plt.plot(np.log(vals))
-plt.show()
+
+def solve_direction(L, D, g):
+    n = len(g)
+
+    # compute y=DLd from Ly=-g
+    y = np.zeros(n)
+    y[0] = -g[0]/L[0, 0]
+    for i in range(1, n):
+        y[i] = -(g[i] + np.dot(y[:i], L[i, :i]))/L[i, i]
+
+    # compute z=y/D
+    z = y/D[:,0]
+
+    # compute d from Lt d = Z
+    Lt = np.transpose(L)
+    d = np.zeros(n)
+    d[-1] = z[-1]/Lt[-1, -1]
+    for i in np.arange(n-2, -1, -1):
+        d[i] = (z[i] - np.dot(z[i+1:], Lt[i, i+1:]))/Lt[i, i]
+
+    return d
+
+
+
+
+
