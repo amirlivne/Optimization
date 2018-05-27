@@ -23,7 +23,7 @@ def modifiedChol(G):
 
 	:param G: a symmetric Matrix to decompose.
 	"""
-    assert np.linalg.norm(G - G.T) == 0
+    assert np.allclose(G, G.T, atol=1e-8)
 
     # initialze variables
     n = G.shape[0]
@@ -90,11 +90,11 @@ def modifiedChol(G):
     return L, d, e
 
 
-if __name__ == '__main__':
-    G = np.array([[2, 6, 10],
-                  [6, 10, 14],
-                  [10, 14, 18]], dtype=np.float64)
-
-    L, d, e = modifiedChol(G)
-    Err = (L @ np.diag(d.flatten()) @ L.T) - G
-    print('Difference between original and decomposed matrices:\n', Err)
+# if __name__ == '__main__':
+#     G = np.array([[2, 6, 10],
+#                   [6, 10, 14],
+#                   [10, 14, 18]], dtype=np.float64)
+#
+#     L, d, e = modifiedChol(G)
+#     Err = (L @ np.diag(d.flatten()) @ L.T) - G
+#     print('Difference between original and decomposed matrices:\n', Err)

@@ -1,4 +1,5 @@
 import numpy as np
+from scipy.io import loadmat
 
 
 def rosenbrok(x, nargout=1):
@@ -26,22 +27,35 @@ def rosenbrok(x, nargout=1):
         return f, g, H
 
 
-def quad_func(x, nargout=1):
-    Q = np.identity(3) + np.ones((3, 3))
-    b = np.zeros(3)
-    c = 2
+def quad_func_well(x, nargout=1):
+    Q = loadmat('h')['H1']
 
-    n = len(x)
-    f = 0.5*np.dot(x, Q).dot(x) - np.dot(b,x) + c
+    f = 0.5*np.dot(x, Q).dot(x)
     if nargout == 1:
         return f
     elif nargout > 3:
         print('error, illegal nargout value')
         return None
-    g = np.dot(x, Q) - b
+    g = np.dot(x, Q)
     if nargout == 2:
         return f, g
     else:   # nargout == 3
         H = Q
         return f, g, H
 
+
+def quad_func_ill(x, nargout=1):
+    Q = loadmat('h')['H2']
+
+    f = 0.5*np.dot(x, Q).dot(x)
+    if nargout == 1:
+        return f
+    elif nargout > 3:
+        print('error, illegal nargout value')
+        return None
+    g = np.dot(x, Q)
+    if nargout == 2:
+        return f, g
+    else:   # nargout == 3
+        H = Q
+        return f, g, H

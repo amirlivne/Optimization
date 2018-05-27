@@ -1,5 +1,6 @@
-from hw2.mcholmz import modifiedChol
+from mcholmz import modifiedChol
 import numpy as np
+
 
 def armijo(x, func, d, sigma=0.25, beta=0.5):
     """
@@ -16,7 +17,6 @@ def armijo(x, func, d, sigma=0.25, beta=0.5):
     alfa = 1.
 
     # compute c (the diffrencial of phi(alfa) at alfa=0)
-    # grad_x = approx_fprime(x, func, epsilon=1e-8)
     _, grad_x = func(x, nargout=2)
     c = np.dot(grad_x, d)
 
@@ -38,7 +38,6 @@ def grad_descent(func, x_init, eps=10e-5):
     converge_vals = []
     while True:
         converge_vals.append(func(x))
-        # grad_x = approx_fprime(x, func, epsilon=1e-8)
         _, grad_x = func(x, nargout=2)
         d = -grad_x
         x += armijo(x, func, d)*d
@@ -59,7 +58,6 @@ def newton_grad_descent(func, x_init, eps=10e-5):
     converge_vals = []
     while True:
         converge_vals.append(func(x))
-        # grad_x = approx_fprime(x, func, epsilon=1e-8)
         _, grad_x, H = func(x, nargout=3)
         L, D, e = modifiedChol(H)
         # Err = (L @ np.diag(D.flatten()) @ L.T) - H
