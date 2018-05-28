@@ -24,7 +24,6 @@ def phi(x, nargout=1):
         return value, grad, hessian
 
 
-
 # h = exp(x)
 def h(x, nargout=1):
     if nargout == 3:
