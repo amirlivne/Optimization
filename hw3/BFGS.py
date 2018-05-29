@@ -35,7 +35,7 @@ def ArmijoLineSearch(func, value, grad, x, d_k):
 
     # check that the directional derivative at current step length a is less negative
     # than for a = 0
-    _,new_grad  = func(x + a * d_k)
+    _, new_grad = func(x + a * d_k)
     c_new = np.matmul(d_k, np.transpose(new_grad))
     if c_new >= c:
         return a, True
@@ -43,8 +43,7 @@ def ArmijoLineSearch(func, value, grad, x, d_k):
         return a, False
 
 
-
-def BFGS(func,x0):
+def BFGS(func, x0):
     """
     calculates the min of "func", by starting from x0 point
     :param func: the target function to minimize.
