@@ -79,23 +79,24 @@ class DNN:
         for layer in self.layers:
             w_shape = layer['w'].shape
             w_n = np.prod(np.array(w_shape))
-            layer['w'] = weights[cnt:cnt+w_n].reshape(w_shape)
+            layer['w'] = np.reshape(weights[cnt:cnt+w_n], w_shape)
             cnt += w_n
 
             b_shape = layer['b'].shape
-            b_n = np.prod(np.array(w_shape))
-            layer['b'] = weights[cnt:cnt+b_n].reshape(b_shape)
+            b_n = np.prod(np.array(b_shape))
+            layer['b'] = np.reshape(weights[cnt:cnt+b_n], b_shape)
             cnt += b_n
 
     def train(self, x, y):
         self.x = x
         self.y = y
         weights = self.get_weights()
-        weights, m = self.optimizer(self.target_func, weights)
-        self.set_weights(weights)
+        m, new_weights = self.optimizer(self.target_func, weights)
+        self.set_weights(new_weights)
         return m
 
     def target_func(self, weights):
+        self.set_weights(weights)
         y_pred = self.forward(self.x)
         self.calc_grads(y_pred, self.y)
         value = np.mean(self.loss(y_pred, self.y))

@@ -1,12 +1,17 @@
 from DNN import *
 
-dnn = DNN()
-dnn.set_input_size(2)
-dnn.add_layer(4, tanh_activation)
-dnn.add_layer(3, tanh_activation)
-dnn.add_layer()
-dnn.compile(loss=mse_loss, optimizer=BFGS)
-# w = dnn.get_weights()
+
+def make_DNN():
+    dnn = DNN()
+    dnn.set_input_size(2)
+    dnn.add_layer(4, tanh_activation)
+    dnn.add_layer(3, tanh_activation)
+    dnn.add_layer()
+    dnn.compile(loss=mse_loss, optimizer=BFGS)
+    return dnn
+
+
+dnn = make_DNN()
 x = np.random.randn(10, 2)
 y = eval_func(x)
 # y_pred = dnn.forward(x)
