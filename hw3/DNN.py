@@ -1,8 +1,7 @@
 import numpy as np
-from BFGS import BFGS
 
 
-def mse_loss(y_true, y_pred, nargout=1):
+def mse_loss(y_pred, y_true, nargout=1):
 
     loss = (y_pred - y_true)**2
     if nargout == 2:
@@ -66,13 +65,13 @@ class DNN:
         weights = np.empty(0)
         for layer in self.layers:
             weights = np.concatenate((weights, layer['w'].flatten(), layer['b'].flatten()))
-        return weights
+        return np.array(weights)
 
     def get_grads(self):
         weights = np.empty(0)
         for layer in self.layers:
             weights = np.concatenate((weights, layer['w_grads'].flatten(), layer['b_grads'].flatten()))
-        return weights
+        return np.array(weights)
 
     def set_weights(self, weights):
         cnt = 0
@@ -99,8 +98,8 @@ class DNN:
         self.set_weights(weights)
         y_pred = self.forward(self.x)
         self.calc_grads(y_pred, self.y)
-        value = np.mean(self.loss(y_pred, self.y))
         grads = self.get_grads()
+        value = np.mean(self.loss(y_pred, self.y))
         return value, grads
 
     def forward(self, x):  # x should be (batch_size, input_size)
@@ -108,8 +107,8 @@ class DNN:
             print('error, x should be (batch_size, input_size)')
             exit()
         elif x.ndim == 2:
-            self.batch_size = x.shape[0]
             x = np.expand_dims(x, axis=1)
+            self.batch_size = x.shape[0]
         elif x.ndim == 1:
             x = np.expand_dims(x, axis=0)
             x = np.expand_dims(x, axis=0)
@@ -147,6 +146,6 @@ class DNN:
         for layer in reversed(self.layers):
             grads *= layer['output_grads']
             layer['b_grads'] = np.mean(grads, axis=0)
-            layer['w_grads'] = np.mean(np.swapaxes(np.matmul(np.swapaxes(grads, 1, 2), layer['input']), 1, 2), axis=0)
-            grads = np.matmul(grads, layer['w'].transpose())
+            layer['w_grads'] = np.mean(np.matmul(np.swapaxes(layer['input'], 1, 2), grads), axis=0)
+            grads = np.matmul(grads, layer['w'].T)
 
