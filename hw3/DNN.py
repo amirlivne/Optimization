@@ -11,10 +11,6 @@ def mse_loss(y_pred, y_true, nargout=1):
         return loss
 
 
-def eval_func(x):
-    return x[:, 0] * np.exp(-np.sum(x**2, axis=1))
-
-
 def tanh_activation(v, nargout=1):
     val = np.tanh(v)
     if nargout == 2:
@@ -90,16 +86,18 @@ class DNN:
         self.x = x
         self.y = y
         weights = self.get_weights()
-        m, new_weights = self.optimizer(self.target_func, weights)
+        new_weights, m = self.optimizer(self.target_func, weights)
         self.set_weights(new_weights)
         return m
 
-    def target_func(self, weights):
+    def target_func(self, weights, nargout=2):
         self.set_weights(weights)
         y_pred = self.forward(self.x)
-        self.calc_grads(y_pred, self.y)
-        grads = self.get_grads()
-        value = np.mean(self.loss(y_pred, self.y))
+        grads = self.calc_grads(y_pred, self.y)
+        # value = np.mean(self.loss(y_pred, self.y))
+        value = self.evaluate(self.x, self.y)
+        if nargout == 1:
+            return value
         return value, grads
 
     def forward(self, x):  # x should be (batch_size, input_size)
@@ -149,3 +147,4 @@ class DNN:
             layer['w_grads'] = np.mean(np.matmul(np.swapaxes(layer['input'], 1, 2), grads), axis=0)
             grads = np.matmul(grads, layer['w'].T)
 
+        return self.get_grads()

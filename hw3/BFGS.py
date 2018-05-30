@@ -5,7 +5,7 @@ import scipy.optimize
 a0 = 1
 sigma = 0.25
 beta = 0.5
-eps = 10 ** -5
+eps = 5.e-5
 
 
 def ArmijoLineSearch(func, value, grad, x, d_k):
@@ -71,7 +71,9 @@ def BFGS(func, x0):
         val, g_new = func(x_new)
         m.append(val)
         if a_is_valid:
-            p = x_new.reshape(1,len(x)) - x.reshape(1,len(x))
+            p = x_new.reshape(1, len(x)) - x.reshape(1, len(x))
+            if p.all() == 0:
+                break
             q = g_new.reshape(1,len(x)) - g.reshape(1,len(x))
             s = np.matmul(B, q.T).T
             tau = np.matmul(s, q.T)
@@ -85,7 +87,7 @@ def BFGS(func, x0):
         g = g_new
         x = x_new
 
-    return m, x
+    return x, m
 
 
 def rosenbrock(X):

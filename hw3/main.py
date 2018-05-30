@@ -1,5 +1,10 @@
 from DNN import *
 from BFGS import BFGS
+import matplotlib.pyplot as plt
+
+
+def eval_func(x):
+    return x[:, 0] * np.exp(-np.sum(x**2, axis=1))
 
 
 def make_DNN():
@@ -12,34 +17,29 @@ def make_DNN():
     return dnn
 
 
-np.random.seed(0)
-dnn = make_DNN()
-x = np.random.randn(400, 2)
-y = eval_func(x)
-# x = np.ones((1, 2))
-# y = np.ones(1)
-# w = dnn.get_weights()
-# dnn.set_weights(w)
-# w2 = dnn.get_weights()
-# dnn.x = x
-# dnn.y = y
-# y_pred = dnn.forward(x)
-# loss, grad = dnn.loss(y_pred, y, nargout=2)
-# dnn.calc_grads(y_pred, y)
-# w3 = dnn.get_weights()
-# grads = dnn.get_grads()
-# # w = dnn.get_weights()
-# # val, grad = dnn.target_func(w)
-# # w1 = 1 + w
-# # val2, grad2 = dnn.target_func(w1)
-# # w2 = dnn.get_weights()
-# y_pred = dnn.forward(x)
-# dnn.calc_grads(y_pred, y)
-# dnn.get_grads()
-# weights = dnn.get_weights()
-# dnn.x = x
-# dnn.y = y
-# value, grads = dnn.target_func(weights)
-m = dnn.train(x, y)
-print(m)
+# randomly choose test and train sets
+np.random.seed()
+n_train = 500
+x_train = np.random.uniform(-2, 2, size=(n_train, 2))
+y_train = eval_func(x_train)
 
+n_test = 200
+x_test = np.random.uniform(-2, 2, size=(n_test, 2))
+y_test = eval_func(x_test)
+
+# train the DNN
+dnn = make_DNN()
+m = dnn.train(x_train, y_train)
+
+# plot results
+print(len(m))
+plt.semilogy(m)
+plt.title('train loss (epoch)')
+plt.ylabel('log(loss)')
+plt.xlabel('epochs')
+plt.savefig('./convergence graph.png')
+plt.show()
+
+# evaluate on test set
+test_loss = dnn.evaluate(x_test, y_test)
+print("test_loss: ", test_loss)
