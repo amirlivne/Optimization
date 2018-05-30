@@ -24,7 +24,7 @@ def ArmijoLineSearch(func, value, grad, x, d_k):
     a = a0
     new_value, _ = func(x+a*d_k)
     y_k = new_value - value
-    c = np.matmul(d_k, np.transpose(grad))
+    c = np.matmul(grad.T, d_k)
     # stop_limit = sigma * a * c
 
     # loop until Armijo condition is satisfied:
@@ -36,7 +36,7 @@ def ArmijoLineSearch(func, value, grad, x, d_k):
     # check that the directional derivative at current step length a is less negative
     # than for a = 0
     _, new_grad = func(x + a * d_k)
-    c_new = np.matmul(d_k, np.transpose(new_grad))
+    c_new = np.matmul(new_grad.T, d_k)
     if c_new >= c:
         return a, True
     else:
@@ -57,28 +57,33 @@ def BFGS(func, x0):
 
     ### Initial guess of hessian matrix is I ###
     B = np.identity(len(x0))
-    x = x0
-    val, g = func(x)
+    x = x0.reshape(len(x0), 1)
+    val, g = func(x0)
+    g = g.reshape(len(g),1)
     m = [val]
-
     while np.linalg.norm(g) > eps:
         # find direction according to Newton:
-        d_k = -np.matmul(B, np.transpose(g))
+        d_k = -np.matmul(B, g)
         # find step size using Armijo inexact line search:
-        a, a_is_valid = ArmijoLineSearch(func, val, g, x, d_k.T)
+        a, a_is_valid = ArmijoLineSearch(func, val, g, x, d_k)
         # update results:
-        x_new = x + a * d_k.T
-        val, g_new = func(x_new)
+        x_new = x + a * d_k
+        val, g_new = func(x_new.reshape(len(x_new)))
+        g_new = g_new.reshape(len(g_new), 1)
         m.append(val)
+        print(val, np.linalg.norm(g), a)
         if a_is_valid:
-            p = x_new.reshape(1,len(x)) - x.reshape(1,len(x))
-            q = g_new.reshape(1,len(x)) - g.reshape(1,len(x))
-            s = np.matmul(B, q.T).T
-            tau = np.matmul(s, q.T)
-            mu = np.matmul(p, q.T)
-            v = p/mu - s/tau
-            # update hessian:
-            B = B + np.matmul(p.T, p) / mu - np.matmul(s.T, s) / tau + np.matmul(v.T, v) * tau
+            if np.matmul(g.T, d_k) < np.matmul(g_new.T, d_k):
+                p = x_new - x
+                q = g_new - g
+                s = np.matmul(B, q)
+                tau = np.matmul(s.T, q)
+                mu = np.matmul(p.T, q)
+                v = p/mu - s/tau
+                # update hessian:
+                B = B + np.matmul(p, p.T) / mu - np.matmul(s, s.T) / tau + np.matmul(v, v.T) * tau
+            else:
+                break
         else: # meaning can't ensure positive hessian. don't update hessian!
             pass
         # update func value and grad
@@ -93,14 +98,22 @@ def rosenbrock(X):
     grad = scipy.optimize.rosen_der(X)
     return val, grad
 
+def test_func(X):
+    val = X[0]*np.sum(np.exp(-np.sum(X**2)))
+    dx = (1-2*X[0]**2)*np.sum(np.exp(-np.sum(X**2)))
+    dy = -2*X[0]*X[1]*np.sum(np.exp(-np.sum(X**2)))
+    return val, np.array([dx, dy])
 
 if __name__ == '__main__':
-    m, min_x = BFGS(rosenbrock, np.array([0.25, 4, 10, 5, 10, -2, 0.023, 5]))
-    import matplotlib.pyplot as plt
-    plt.figure()
-    plt.plot([i for i in range(len(m))], m)
-    plt.title("Rosenbrock function minimization using BFGS (N=8)")
-    plt.xlabel("Iteration")
-    plt.ylabel("Rosenbrock Value")
-    plt.show()
+    m, min_x = BFGS(rosenbrock, np.array([0.25, 4, 10]))
+    # m, min_x = BFGS(test_func, np.array([-2, 0.5]))
+    print("min is at", min_x)
+    print(m)
+    # import matplotlib.pyplot as plt
+    # plt.figure()
+    # plt.plot([i for i in range(len(m))], m)
+    # plt.title("Rosenbrock function minimization using BFGS (N=8)")
+    # plt.xlabel("Iteration")
+    # plt.ylabel("Rosenbrock Value")
+    # plt.show()
 
