@@ -22,7 +22,7 @@ def ArmijoLineSearch(func, value, grad, x, d_k):
     """
     # initilize first iteration:
     a = a0
-    new_value, _ = func(x+a*d_k)
+    new_value = func(x+a*d_k)
     y_k = new_value - value
     c = np.matmul(grad.T, d_k)
     # stop_limit = sigma * a * c
@@ -30,12 +30,12 @@ def ArmijoLineSearch(func, value, grad, x, d_k):
     # loop until Armijo condition is satisfied:
     while y_k > sigma * a * c:
         a = beta*a
-        new_value, _ = func(x + a * d_k)
+        new_value = func(x + a * d_k)
         y_k = new_value - value
 
     # check that the directional derivative at current step length a is less negative
     # than for a = 0
-    _, new_grad = func(x + a * d_k)
+    _, new_grad = func(x + a * d_k, nargout=2)
     c_new = np.matmul(new_grad.T, d_k)
     if c_new >= c:
         return a, True
@@ -58,7 +58,7 @@ def BFGS(func, x0):
     ### Initial guess of hessian matrix is I ###
     B = np.identity(len(x0))
     x = x0.reshape(len(x0), 1)
-    val, g = func(x0)
+    val, g = func(x0, nargout=2)
     g = g.reshape(len(g),1)
     m = [val]
     while np.linalg.norm(g) > eps:
@@ -68,7 +68,7 @@ def BFGS(func, x0):
         a, a_is_valid = ArmijoLineSearch(func, val, g, x, d_k)
         # update results:
         x_new = x + a * d_k
-        val, g_new = func(x_new.reshape(len(x_new)))
+        val, g_new = func(x_new.reshape(len(x_new)), nargout=2)
         g_new = g_new.reshape(len(g_new), 1)
         m.append(val)
         if a_is_valid:
@@ -92,16 +92,22 @@ def BFGS(func, x0):
     return x, m
 
 
-def rosenbrock(X):
+def rosenbrock(X, nargout=1):
     val = scipy.optimize.rosen(X)
     grad = scipy.optimize.rosen_der(X)
+    if nargout == 1:
+        return val
     return val, grad
 
-def test_func(X):
+
+def test_func(X, nargout=1):
     val = X[0]*np.sum(np.exp(-np.sum(X**2)))
     dx = (1-2*X[0]**2)*np.sum(np.exp(-np.sum(X**2)))
     dy = -2*X[0]*X[1]*np.sum(np.exp(-np.sum(X**2)))
+    if nargout == 1:
+        return val
     return val, np.array([dx, dy])
+
 
 if __name__ == '__main__':
     m, min_x = BFGS(rosenbrock, np.array([0.25, 4, 10]))

@@ -90,7 +90,7 @@ class DNN:
         self.set_weights(new_weights)
         return m
 
-    def target_func(self, weights, nargout=2):
+    def target_func(self, weights, nargout=1):
         self.set_weights(weights)
         y_pred = self.forward(self.x)
         grads = self.calc_grads(y_pred, self.y)
