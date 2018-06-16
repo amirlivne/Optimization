@@ -75,17 +75,17 @@ def solve_direction(L, D, g):
     y = np.zeros(n)
     y[0] = -g[0]/L[0, 0]
     for i in range(1, n):
-        y[i] = -(g[i] + np.dot(y[:i], L[i, :i]))/L[i, i]
+        y[i] = -(g[i] + (L[i, :i] @ y[:i]))/L[i, i]
 
     # compute z=y/D
     z = y/D[:,0]
 
     # compute d from Lt d = Z
-    Lt = np.transpose(L)
+    Lt = L.T
     d = np.zeros(n)
     d[-1] = z[-1]/Lt[-1, -1]
     for i in np.arange(n-2, -1, -1):
-        d[i] = (z[i] - np.dot(z[i+1:], Lt[i, i+1:]))/Lt[i, i]
+        d[i] = (z[i] - Lt[i, i+1:] @ z[i+1:])/Lt[i, i]
 
     return d
 
