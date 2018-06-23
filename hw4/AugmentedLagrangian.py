@@ -2,6 +2,7 @@ import numpy as np
 from GradDescent import newton_grad_descent
 import copy
 
+
 def QuadraticLogarithmicPenalty(x):
 
     if x >= -0.5:
@@ -42,9 +43,11 @@ def AugmentedLagrangianSolver(x_init, func, constrains, pmax=1000, alfa=4, eps=1
     lambda_list = [copy.deepcopy(lambda_vec)]
     gradients = []
 
+    cnt = 0
     # iterate
     while True:
-
+        print(cnt)
+        cnt+=1
         # define updated F penalty function
         def Fpenalty(x, nargout=1):
             val, g, H = func(x, nargout=3)
@@ -69,7 +72,7 @@ def AugmentedLagrangianSolver(x_init, func, constrains, pmax=1000, alfa=4, eps=1
             break
 
         # optimize the F penalty function using newton method
-        xk, t = newton_grad_descent(Fpenalty, xk)
+        xk, t = newton_grad_descent(Fpenalty, xk, eps=10e-4)
         # plt.plot(t)
         # plt.show()
 
